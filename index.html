@@ -94,13 +94,23 @@
         }
       });
 
-      // Get Current Location
+      function getLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(showPosition, showError, {
+            enableHighAccuracy: true,
+            timeout: 1000,
+            maximumAge: 0,
+          });
+        } else {
+          errorMessage.innerHTML = "Geolocation tidak didukung oleh browser ini.";
+        }
+      }
+
       function showPosition(position) {
         const lat = position.coords.latitude;
         const lon = position.coords.longitude;
-        const apiUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`;
 
-        fetch(apiUrl)
+        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`)
           .then((response) => response.json())
           .then((data) => {
             console.log(data);
@@ -133,17 +143,24 @@
           });
       }
 
-      locationElement.addEventListener("click", () => {
-        getLocation();
-      });
-
-      function getLocation() {
-        if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(showPosition);
-        } else {
-          errorMessage.innerHTML = "Geolocation is not supported by this browser.";
+      function showError(error) {
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage.innerHTML = "Pengguna menolak permintaan untuk Geolocation.";
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage.innerHTML = "Informasi lokasi tidak tersedia.";
+            break;
+          case error.TIMEOUT:
+            errorMessage.innerHTML = "Permintaan untuk mendapatkan lokasi pengguna habis waktu.";
+            break;
+          case error.UNKNOWN_ERROR:
+            errorMessage.innerHTML = "Terjadi kesalahan yang tidak diketahui.";
+            break;
         }
       }
+
+      locationElement.addEventListener("click", getLocation);
     </script>
   </body>
 </html>
