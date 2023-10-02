@@ -12,7 +12,7 @@
       <div class="search">
         <input type="text" placeholder="enter city name" spellcheck="false" />
         <button id="searchBtn"><img src="images/search.png" alt="search" /></button>
-        <button id="currentBtn"><img src="images/current-location.png" alt="search" /></button>
+        <button id="currentBtn"><img src="images/current-location.png" alt="currentBtn" /></button>
       </div>
       <div class="error">
         <p>Invalid City Name</p>
@@ -51,37 +51,42 @@
       async function checkWeather(city) {
         const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
 
-        if (response.status == 404 || response.status == 400) {
+        if (!response.ok) {
           errorMessage.style.display = "block";
           document.querySelector(".weather").style.display = "none";
-        } else {
-          let data = await response.json();
-          console.log(data);
-
-          document.querySelector(".city").innerHTML = data.name + "," + data.sys.country;
-          document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
-          document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
-          document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
-          errorMessage.style.display = "none";
-
-          if (data.weather[0].main === "Clouds") {
-            document.querySelector(".weather-icon").src = "images/clouds.png";
-          } else if (data.weather[0].main === "Rain") {
-            document.querySelector(".weather-icon").src = "images/rain.png";
-          } else if (data.weather[0].main === "Drizzle") {
-            document.querySelector(".weather-icon").src = "images/drizzle.png";
-          } else if (data.weather[0].main === "Clear") {
-            document.querySelector(".weather-icon").src = "images/clear.png";
-          } else if (data.weather[0].main === "Snow") {
-            document.querySelector(".weather-icon").src = "images/snow.png";
-          } else if (data.weather[0].main === "Mist") {
-            document.querySelector(".weather-icon").src = "images/mist.png";
-          }
-
-          document.querySelector(".weather").style.display = "block";
-
-          document.querySelector(".search input").value = "";
+          return;
         }
+
+        let data = await response.json();
+        let sunrise = new Date(data.sys.sunrise * 1000);
+        let sunset = new Date(data.sys.sunset * 1000);
+
+        let now = new Date();
+        let isDayTime = now >= sunrise && now < sunset;
+
+        document.querySelector(".city").innerHTML = `${data.name}, ${data.sys.country}`;
+        document.querySelector(".temp").innerHTML = `${Math.round(data.main.temp)}°C`;
+        document.querySelector(".humidity").innerHTML = `${data.main.humidity}%`;
+        document.querySelector(".wind").innerHTML = `${data.wind.speed} km/h`;
+
+        errorMessage.style.display = "none";
+
+        const weatherIconMap = {
+          Clouds: "images/clouds.png",
+          Rain: "images/rain.png",
+          Drizzle: "images/drizzle.png",
+          Clear: "images/clear.png",
+          Snow: "images/snow.png",
+          Mist: "images/mist.png",
+        };
+
+        document.querySelector(".weather-icon").src = weatherIconMap[data.weather[0].main] || "";
+
+        document.querySelector(".weather").style.display = "block";
+
+        document.querySelector(".card").style.backgroundImage = isDayTime ? 'url("/images/day.avif")' : 'url("/images/night.jpg")';
+
+        searchBox.value = "";
       }
 
       searchBtn.addEventListener("click", () => {
@@ -94,73 +99,74 @@
         }
       });
 
-      function getLocation() {
+      // current Location
+      document.getElementById("currentBtn").addEventListener("click", function () {
         if (navigator.geolocation) {
-          navigator.geolocation.getCurrentPosition(showPosition, showError, {
-            enableHighAccuracy: true,
-            timeout: 1000,
-            maximumAge: 0,
-          });
+          navigator.geolocation.getCurrentPosition(getWeather, showError);
         } else {
-          errorMessage.innerHTML = "Geolocation tidak didukung oleh browser ini.";
+          alert("Geolocation is not supported by this browser.");
         }
-      }
+      });
 
-      function showPosition(position) {
-        const lat = position.coords.latitude;
-        const lon = position.coords.longitude;
-
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${apiKey}`)
+      function getWeather(position) {
+        let lat = position.coords.latitude;
+        let lon = position.coords.longitude;
+        // units metric => to get the temperature in units Celsius
+        fetch(`https://api.openweathermap.org/data/2.5/weather?&units=metric&lat=${lat}&lon=${lon}&appid=${apiKey}`)
           .then((response) => response.json())
           .then((data) => {
-            console.log(data);
+            document.querySelector(".weather").style.display = "block";
             errorMessage.style.display = "none";
-
             document.querySelector(".city").innerHTML = data.name + "," + data.sys.country;
             document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
             document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
             document.querySelector(".wind").innerHTML = data.wind.speed + " km/h";
 
-            if (data.weather[0].main === "Clouds") {
-              document.querySelector(".weather-icon").src = "images/clouds.png";
-            } else if (data.weather[0].main === "Rain") {
-              document.querySelector(".weather-icon").src = "images/rain.png";
-            } else if (data.weather[0].main === "Drizzle") {
-              document.querySelector(".weather-icon").src = "images/drizzle.png";
-            } else if (data.weather[0].main === "Clear") {
-              document.querySelector(".weather-icon").src = "images/clear.png";
-            } else if (data.weather[0].main === "Snow") {
-              document.querySelector(".weather-icon").src = "images/snow.png";
-            } else if (data.weather[0].main === "Mist") {
-              document.querySelector(".weather-icon").src = "images/mist.png";
-            }
+            let sunrise = new Date(data.sys.sunrise * 1000);
+            let sunset = new Date(data.sys.sunset * 1000);
 
-            document.querySelector(".weather").style.display = "block";
+            let now = new Date();
+            let isDayTime = now >= sunrise && now < sunset;
+
+            document.querySelector(".card").style.backgroundImage = isDayTime ? 'url("/images/day.avif")' : 'url("/images/night.jpg")';
           })
-          .catch((error) => {
-            console.error("Error fetching current weather:", error);
-            errorMessage.style.display = "block";
-          });
+          .catch((error) => console.error(error));
       }
 
       function showError(error) {
         switch (error.code) {
           case error.PERMISSION_DENIED:
-            errorMessage.innerHTML = "Pengguna menolak permintaan untuk Geolocation.";
+            alert("User denied the request for Geolocation.");
             break;
           case error.POSITION_UNAVAILABLE:
-            errorMessage.innerHTML = "Informasi lokasi tidak tersedia.";
+            alert("Location information is unavailable.");
             break;
           case error.TIMEOUT:
-            errorMessage.innerHTML = "Permintaan untuk mendapatkan lokasi pengguna habis waktu.";
+            alert("The request to get user location timed out.");
             break;
           case error.UNKNOWN_ERROR:
-            errorMessage.innerHTML = "Terjadi kesalahan yang tidak diketahui.";
+            alert("An unknown error occurred.");
             break;
         }
+        // documentation using geolocation => https://developer.mozilla.org/en-US/search?q=Using%20geolocation
       }
 
-      locationElement.addEventListener("click", getLocation);
+      // Get sunrise and susnet
+      // function getSunriseSunset(lat, lon, apiKey, position) {
+      //   // Membuat permintaan ke API
+      //   fetch("https://api.openweathermap.org/data/2.5/onecall?lat=" + lat + "&lon=" + lon + "&appid=" + apiKey)
+      //     .then((response) => response.json())
+      //     .then((data) => {
+      //       let sunrise = new Date(data.current.sunrise * 1000);
+      //       let sunset = new Date(data.current.sunset * 1000);
+
+      //       console.log("Matahari terbit: " + sunrise);
+      //       console.log("Matahari terbenam: " + sunset);
+      //     })
+      //     .catch((error) => console.log("error"));
+      // }
+
+      // getSunriseSunset(lat, lon, apiKey);
     </script>
   </body>
 </html>
