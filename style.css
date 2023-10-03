@@ -10,16 +10,16 @@ body {
 }
 
 .card {
-  width: 90%;
-  max-width: max-content;
+  max-width: 35rem;
+  max-height: max-content;
   background-repeat: no-repeat;
   background-size: cover;
-  background-position-y: -2rem;
   color: #fff;
   margin: 1.75rem auto;
   border-radius: 20px;
   padding: 40px 35px;
   text-align: center;
+  padding: 4.5rem;
 }
 
 .search {
@@ -32,6 +32,7 @@ body {
   backdrop-filter: blur(10px); /* mengaburkan elemen di belakang */
   padding: 1rem;
   border-radius: 16px;
+  margin-bottom: 5rem;
 }
 
 .search input {
@@ -78,11 +79,13 @@ body {
 .weather {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
 }
 
 .weather-icon {
-  width: 170px;
-  margin-top: 30px;
+  width: 12rem;
+  margin: 2rem 0;
 }
 
 .weather h1 {
@@ -93,21 +96,29 @@ body {
 .weather h2 {
   font-size: 80px;
   font-weight: 400;
-  margin-top: -10px;
+  margin-top: -1rem;
 }
 
 .details {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  width: max-content;
   padding: 0.5rem 20px;
-  margin-top: 50px;
+  margin-top: 10rem;
   background: rgba(63, 154, 220, 0.463);
   backdrop-filter: blur(5px);
   -webkit-backdrop-filter: blur(5px);
   border: 1px solid rgba(255, 255, 255, 0.3);
-  gap: 2rem;
   border-radius: 5px;
+}
+
+.details-wrap {
+  display: flex;
+  max-width: 100%;
+  flex-wrap: wrap;
+  border: 1px solid red;
+  max-width: 27.5rem;
 }
 
 .col {
@@ -116,12 +127,17 @@ body {
   text-align: left;
 }
 
+.col .humidity:last-child {
+  padding-right: 30px;
+  padding-left: 10px;
+}
+
 .col img {
   width: 40px;
   margin-right: 10px;
 }
 
-.humidity,
+.col .humidity,
 .wind {
   font-size: 1.25rem;
 }
@@ -139,10 +155,14 @@ body {
 
 @media only screen and (max-width: 600px) {
   .card {
-    width: auto;
-    height: auto;
     padding: 1rem;
     margin: 2rem auto;
+    width: max-content;
+    background-position: cover;
+  }
+  .search {
+    width: 20rem;
+    margin: 0 auto;
   }
 
   .search input {
@@ -153,9 +173,6 @@ body {
     width: 4rem;
   }
 
-  .weather-icon {
-    margin-top: 1rem;
-  }
   .weather h1 {
     font-size: 3.5rem;
     margin-bottom: 0.5rem;
@@ -166,9 +183,9 @@ body {
   }
 
   .details {
-    gap: 0.5rem;
-    max-width: 20rem;
-    margin: 2rem auto;
+    display: flex;
+    margin-right: auto;
+    margin-left: auto;
   }
 
   .details .col img {
