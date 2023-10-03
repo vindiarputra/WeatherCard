@@ -84,7 +84,7 @@
 
         document.querySelector(".weather").style.display = "block";
 
-        document.querySelector(".card").style.backgroundImage = isDayTime ? 'url("/images/day.avif")' : 'url("/images/night.jpg")';
+        document.querySelector(".card").style.backgroundImage = isDayTime ? 'url("./images/day.avif")' : 'url("./images/night.jpg")';
 
         searchBox.value = "";
       }
@@ -128,7 +128,7 @@
             let now = new Date();
             let isDayTime = now >= sunrise && now < sunset;
 
-            document.querySelector(".card").style.backgroundImage = isDayTime ? 'url("/images/day.avif")' : 'url("/images/night.jpg")';
+            document.querySelector(".card").style.backgroundImage = isDayTime ? 'url("./images/day.avif")' : 'url("./images/night.jpg")';
           })
           .catch((error) => console.error(error));
       }
